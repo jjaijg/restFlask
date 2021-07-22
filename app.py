@@ -1,4 +1,4 @@
-from flask import Flask, request
+from flask import Flask, send_from_directory
 from flask_restful import Api
 from flask_jwt import JWT
 from flask_cors import CORS
@@ -9,7 +9,7 @@ from resources.item import Item, ItemList
 from resources.store import Store, StoreList
 from auth import authenticate, identity
 
-app = Flask(__name__)
+app = Flask(__name__, static_url_path='', static_folder='build')
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///data.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.secret_key = 'My secret key'
@@ -26,6 +26,11 @@ def create_tables():
 db.init_app(app)
 
 jwt = JWT(app, authenticate, identity)  # create a route /auth
+
+
+@app.route('/', defaults={'path': ''})
+def serve_react(path):
+    return send_from_directory(app.static_folder, 'index.html')
 
 
 api.add_resource(StoreList, '/stores')
